@@ -1,6 +1,6 @@
 // @flow
 
-import { get } from "./lens";
+import { get, set } from "./lens";
 
 describe("getting", () => {
   it("allows to get values 1 level deep", () => {
@@ -10,11 +10,23 @@ describe("getting", () => {
     //$ExpectError
     expect(get("bar", { foo: 42 })).toBe(undefined);
   });
+  it("value type error");
+  it("allows to return a supertype");
   it("allows to get values 2 level deep");
 });
 
 describe("setting", () => {
-  it("allows to set values 1 level deep");
+  it("allows to set values 1 level deep", () => {
+    const x = { foo: 42 };
+    set("foo", x, 23);
+    expect(x).toEqual({ foo: 23 });
+  });
+  it("type-errors when the field doesn't exist", () => {
+    //$ExpectError
+    set("bar", { foo: 42 }, 23);
+  });
+  it("value type error");
+  it("allows to set a subtype");
   it("allows to set values 2 level deep");
 });
 
