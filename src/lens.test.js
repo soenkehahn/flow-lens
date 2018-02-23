@@ -13,6 +13,7 @@ describe("getting", () => {
   it("value type error");
   it("allows to return a supertype");
   it("allows to get values 2 level deep");
+  it("works for exact types");
 });
 
 describe("setting", () => {
@@ -28,6 +29,7 @@ describe("setting", () => {
   it("value type error");
   it("allows to set a subtype");
   it("allows to set values 2 level deep");
+  it("works for exact types");
 });
 
 describe("modifying", () => {
