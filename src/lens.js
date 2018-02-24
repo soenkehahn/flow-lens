@@ -1,16 +1,13 @@
 // @flow
 
-export const get: <Field, O: *, Value: $ElementType<O, Field>>(
-  Field,
-  O
-) => Value = (field, object) => {
-  return object[field];
-};
+export type Lens<Obj, A> = {|
+  get: Obj => A,
+  set: (Obj, A) => Obj
+|};
 
-export const set: <Field, O: *, Value: $ElementType<O, Field>>(
-  Field,
-  O,
-  Value
-) => void = (field, object, value) => {
-  object[field] = value;
-};
+export function mkLens<O, A>(get: O => A, set: (O, A) => O): Lens<O, A> {
+  return {
+    get: get,
+    set: set
+  };
+}
