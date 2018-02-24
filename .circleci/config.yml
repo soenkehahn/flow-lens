@@ -1,0 +1,10 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: node:9.5.0
+    steps:
+      - checkout
+      - run: yarn install --ignore-scripts
+      - run: yarn test
+      - run: yarn build
