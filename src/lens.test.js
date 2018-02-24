@@ -163,19 +163,6 @@ describe("compose", () => {
   });
 });
 
-describe("mkLens", () => {
-  it("works without type annotations", () => {
-    const foo_ = mkLens(
-      o => o.foo,
-      (o, v) => ({
-        ...o,
-        foo: v
-      })
-    );
-    expect(foo_.modify({ foo: 42 }, n => n + 1)).toEqual({ foo: 43 });
-  });
-});
-
 describe("lens", () => {
   it("is not verbose", () => {
     const bar_ = lens((obj, f) => ({ ...obj, bar: f(obj.bar) }));
@@ -198,6 +185,13 @@ describe("lens", () => {
     expect(() => bar_.modify({ bar: 42 }, n => n + 1)).toThrow(
       "invalid lens: use the passed in function on the inner type!"
     );
+  });
+});
+
+describe("general usage", () => {
+  it("works without type annotations", () => {
+    const foo_ = lens((obj, f) => ({ ...obj, foo: f(obj.foo) }));
+    expect(foo_.modify({ foo: 42 }, n => n + 1)).toEqual({ foo: 43 });
   });
   it("works for exact object types", () => {
     const foo_exact = lens((o, f) => ({ ...o, foo: f(o.foo) }));
