@@ -2,7 +2,7 @@
 
 import { type Lens, mkLens, lens, compose } from "./lens";
 
-const foo_ = mkLens(
+const foo_: Lens<{ foo: number }, number> = mkLens(
   o => o.foo,
   (o, v) => ({
     ...o,
@@ -85,8 +85,12 @@ describe("modifying", () => {
     foo_.modify({ bar: 42 }, n => n + 1);
   });
   it("allows to change the inner type", () => {
+    const foo_changing: Lens<{ foo: mixed }, mixed> = mkLens(
+      o => o.foo,
+      (o, v) => ({ ...o, foo: v })
+    );
     const x = { foo: 42 };
-    expect(foo_.modify(x, n => "string")).toEqual({ foo: "string" });
+    expect(foo_changing.modify(x, n => "string")).toEqual({ foo: "string" });
   });
   describe("super- and subtypes", () => {
     type T = { a: number, b: number };
@@ -211,7 +215,11 @@ describe("lens", () => {
     const c = new C(42);
     expect(foo_class.modify(c, n => n + 1)).toEqual({ foo: 43 });
   });
-  it("allows to make a polymorphic lens");
+  it("allows to make a less specific lenses", () => {
+    const foo_polymorphic = lens((o, f) => ({ ...o, foo: f(o.foo) }));
+    expect(foo_polymorphic.get({ foo: 42 })).toEqual(42);
+    expect(foo_polymorphic.get({ foo: "string" })).toEqual("string");
+  });
 });
 
 function dont(action: () => void): void {}
