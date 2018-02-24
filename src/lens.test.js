@@ -2,7 +2,7 @@
 
 import { type Lens, mkLens, compose } from "./lens";
 
-const foo_: Lens<{ foo: number }, number> = mkLens(
+const foo_ = mkLens(
   o => o.foo,
   (o, v) => ({
     ...o,
@@ -48,18 +48,25 @@ describe("setting", () => {
       expect(foo_.set({ bar: 42 }, 23)).toEqual({ bar: 42, foo: 23 });
     });
   });
-  it("value type error", () => {
+  it("allows to create lenses with narrower field types", () => {
+    const foo_narrow: Lens<{ foo: number }, number> = mkLens(
+      o => o.foo,
+      (o, v) => ({
+        ...o,
+        foo: v
+      })
+    );
     const x = { foo: 42 };
     //$ExpectError
-    expect(foo_.set(x, "string")).toEqual({ foo: "string" });
+    expect(foo_narrow.set(x, "string")).toEqual({ foo: "string" });
   });
   it("allows to set a subtype", () => {
-    const foo_: Lens<{ foo: mixed }, mixed> = mkLens(
+    const foo_mixed: Lens<{ foo: mixed }, mixed> = mkLens(
       o => o.foo,
       (o, v) => ({ ...o, foo: v })
     );
     const x: { foo: mixed } = { foo: 42 };
-    expect(foo_.set(x, "string")).toEqual({ foo: "string" });
+    expect(foo_mixed.set(x, "string")).toEqual({ foo: "string" });
   });
 });
 
@@ -77,59 +84,55 @@ describe("modifying", () => {
     //$ExpectError
     foo_.modify({ bar: 42 }, n => n + 1);
   });
-  it("value type error", () => {
+  it("allows to change the inner type", () => {
     const x = { foo: 42 };
-    //$ExpectError
     expect(foo_.modify(x, n => "string")).toEqual({ foo: "string" });
   });
   describe("super- and subtypes", () => {
     type T = { a: number, b: number };
     type SuperT = { a: number };
     type SubT = { a: number, b: number, c: number };
-    const foo_: Lens<{ foo: T }, T> = mkLens(
-      o => o.foo,
-      (o, v) => ({ ...o, foo: v })
-    );
+    const foo_T = mkLens(o => o.foo, (o, v) => ({ ...o, foo: v }));
     it("allows to consume a supertype", () => {
       function f(x: SuperT): T {
         return { ...x, b: 13 };
       }
       const obj: { foo: T } = { foo: { a: 42, b: 23 } };
-      expect(foo_.modify(obj, f)).toEqual({ foo: { a: 42, b: 13 } });
+      expect(foo_T.modify(obj, f)).toEqual({ foo: { a: 42, b: 13 } });
     });
     it("allows to set a subtype", () => {
       function f(x: T): SubT {
         return { ...x, c: 13 };
       }
       const obj: { foo: T } = { foo: { a: 42, b: 23 } };
-      expect(foo_.modify(obj, f)).toEqual({ foo: { a: 42, b: 23, c: 13 } });
+      expect(foo_T.modify(obj, f)).toEqual({ foo: { a: 42, b: 23, c: 13 } });
     });
     it("allows to consume a supertype and set a subtype", () => {
       function f(x: SuperT): SubT {
         return { ...x, b: 13, c: 51 };
       }
       const obj: { foo: T } = { foo: { a: 42, b: 23 } };
-      expect(foo_.modify(obj, f)).toEqual({ foo: { a: 42, b: 13, c: 51 } });
+      expect(foo_T.modify(obj, f)).toEqual({ foo: { a: 42, b: 13, c: 51 } });
     });
   });
 });
 
 describe("compose", () => {
-  const foo_: Lens<{ foo: { bar: number } }, { bar: number }> = mkLens(
+  const foo_C = mkLens(
     o => o.foo,
     (o, v) => ({
       ...o,
       foo: v
     })
   );
-  const bar_: Lens<{ bar: number }, number> = mkLens(
+  const bar_ = mkLens(
     o => o.bar,
     (o, v) => ({
       ...o,
       bar: v
     })
   );
-  const foo_bar_ = compose(foo_, bar_);
+  const foo_bar_ = compose(foo_C, bar_);
 
   it("allows to get nested values", () => {
     expect(foo_bar_.get({ foo: { bar: 42 } })).toEqual(42);
@@ -157,10 +160,23 @@ describe("compose", () => {
 });
 
 describe("mkLens", () => {
-  it("works without type annotations");
+  it("works without type annotations", () => {
+    const foo_ = mkLens(
+      o => o.foo,
+      (o, v) => ({
+        ...o,
+        foo: v
+      })
+    );
+    expect(foo_.modify({ foo: 42 }, n => n + 1)).toEqual({ foo: 43 });
+  });
+});
+
+describe("lens", () => {
   it("is not verbose");
   it("works for exact object types");
   it("works for classes");
+  it("allows to make a polymorphic lens");
 });
 
 function dont(action: () => void): void {}
