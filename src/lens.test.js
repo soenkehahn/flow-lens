@@ -1,6 +1,6 @@
 // @flow
 
-import { type Lens, mkLens, compose } from "./lens";
+import { type Lens, mkLens, lens, compose } from "./lens";
 
 const foo_ = mkLens(
   o => o.foo,
@@ -173,7 +173,11 @@ describe("mkLens", () => {
 });
 
 describe("lens", () => {
-  it("is not verbose");
+  it("is not verbose", () => {
+    const bar_ = lens((obj, f) => ({ ...obj, bar: f(obj.bar) }));
+    expect(bar_.modify({ bar: 42 }, n => n + 1)).toEqual({ bar: 43 });
+  });
+  it("gives a nice error message when passed in 'modify' isn't used");
   it("works for exact object types");
   it("works for classes");
   it("allows to make a polymorphic lens");
