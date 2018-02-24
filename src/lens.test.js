@@ -4,12 +4,10 @@ import { type Lens, mkLens } from "./lens";
 
 const foo_: Lens<{ foo: number }, number> = mkLens(
   o => o.foo,
-  (o, v) => {
-    return {
-      ...o,
-      foo: v
-    };
-  }
+  (o, v) => ({
+    ...o,
+    foo: v
+  })
 );
 
 describe("getting", () => {
@@ -66,13 +64,54 @@ describe("setting", () => {
 });
 
 describe("modifying", () => {
-  it("allows to modify values");
-  it("does not mutate the given object");
-  it("type-errors when the field doesn't exist");
-  it("value type error");
-  it("allows to set a subtype");
-  it("allows to consume a supertype");
-  it("allows to consume a supertype and set a subtype");
+  it("allows to modify values", () => {
+    const x = { foo: 42 };
+    expect(foo_.modify(x, n => n + 1)).toEqual({ foo: 43 });
+  });
+  it("does not mutate the given object", () => {
+    const x = { foo: 42 };
+    foo_.modify(x, n => n + 1);
+    expect(x.foo).toEqual(42);
+  });
+  it("type-errors when the field doesn't exist", () => {
+    //$ExpectError
+    foo_.modify({ bar: 42 }, n => n + 1);
+  });
+  it("value type error", () => {
+    const x = { foo: 42 };
+    //$ExpectError
+    expect(foo_.modify(x, n => "string")).toEqual({ foo: "string" });
+  });
+  describe("super- and subtypes", () => {
+    type T = { a: number, b: number };
+    type SuperT = { a: number };
+    type SubT = { a: number, b: number, c: number };
+    const foo_: Lens<{ foo: T }, T> = mkLens(
+      o => o.foo,
+      (o, v) => ({ ...o, foo: v })
+    );
+    it("allows to consume a supertype", () => {
+      function f(x: SuperT): T {
+        return { ...x, b: 13 };
+      }
+      const obj: { foo: T } = { foo: { a: 42, b: 23 } };
+      expect(foo_.modify(obj, f)).toEqual({ foo: { a: 42, b: 13 } });
+    });
+    it("allows to set a subtype", () => {
+      function f(x: T): SubT {
+        return { ...x, c: 13 };
+      }
+      const obj: { foo: T } = { foo: { a: 42, b: 23 } };
+      expect(foo_.modify(obj, f)).toEqual({ foo: { a: 42, b: 23, c: 13 } });
+    });
+    it("allows to consume a supertype and set a subtype", () => {
+      function f(x: SuperT): SubT {
+        return { ...x, b: 13, c: 51 };
+      }
+      const obj: { foo: T } = { foo: { a: 42, b: 23 } };
+      expect(foo_.modify(obj, f)).toEqual({ foo: { a: 42, b: 13, c: 51 } });
+    });
+  });
 });
 
 describe("compose", () => {
