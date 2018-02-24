@@ -195,8 +195,22 @@ describe("lens", () => {
       "invalid lens: use the passed in function on the inner type!"
     );
   });
-  it("works for exact object types");
-  it("works for classes");
+  it("works for exact object types", () => {
+    const foo_exact = lens((o, f) => ({ ...o, foo: f(o.foo) }));
+    const x: {| foo: number |} = { foo: 42 };
+    expect(foo_exact.modify(x, n => n + 1)).toEqual({ foo: 43 });
+  });
+  it("works for classes", () => {
+    class C {
+      foo: number;
+      constructor(foo: number) {
+        this.foo = foo;
+      }
+    }
+    const foo_class = lens((o, f) => ({ ...o, foo: f(o.foo) }));
+    const c = new C(42);
+    expect(foo_class.modify(c, n => n + 1)).toEqual({ foo: 43 });
+  });
   it("allows to make a polymorphic lens");
 });
 
