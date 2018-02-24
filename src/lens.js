@@ -1,12 +1,15 @@
 // @flow
 
-export type Lens<Obj, A> = {|
-  get: Obj => A,
-  set: (Obj, A) => Obj,
-  modify: (Obj, (A) => A) => Obj
+export type Lens<Obj, Value> = {|
+  get: Obj => Value,
+  set: (Obj, Value) => Obj,
+  modify: (Obj, (Value) => Value) => Obj
 |};
 
-export function mkLens<O, A>(get: O => A, set: (O, A) => O): Lens<O, A> {
+export function mkLens<Obj, Value>(
+  get: Obj => Value,
+  set: (Obj, Value) => Obj
+): Lens<Obj, Value> {
   return {
     get: get,
     set: set,
@@ -27,10 +30,12 @@ class ShortCut {}
 const invalidErrorMessage =
   "invalid lens: use the passed in function on the inner type!";
 
-export function lens<O, A>(modify: (O, (A) => A) => O): Lens<O, A> {
+export function lens<Obj, Value>(
+  modify: (Obj, (Value) => Value) => Obj
+): Lens<Obj, Value> {
   return mkLens(
     obj => {
-      let result: ?A = null;
+      let result: ?Value = null;
       try {
         modify(obj, value => {
           result = value;
