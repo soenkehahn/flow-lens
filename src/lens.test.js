@@ -1,6 +1,6 @@
 // @flow
 
-import { type Lens, mkLens } from "./lens";
+import { type Lens, mkLens, compose } from "./lens";
 
 const foo_: Lens<{ foo: number }, number> = mkLens(
   o => o.foo,
@@ -115,14 +115,49 @@ describe("modifying", () => {
 });
 
 describe("compose", () => {
-  it("allows to get nested values");
-  it("allows to set nested values");
-  it(".set does not mutate any objects");
-  it("allows to modify nested values");
-  it(".modify does not mutate any objects");
+  const foo_: Lens<{ foo: { bar: number } }, { bar: number }> = mkLens(
+    o => o.foo,
+    (o, v) => ({
+      ...o,
+      foo: v
+    })
+  );
+  const bar_: Lens<{ bar: number }, number> = mkLens(
+    o => o.bar,
+    (o, v) => ({
+      ...o,
+      bar: v
+    })
+  );
+  const foo_bar_ = compose(foo_, bar_);
+
+  it("allows to get nested values", () => {
+    expect(foo_bar_.get({ foo: { bar: 42 } })).toEqual(42);
+  });
+  it("allows to set nested values", () => {
+    expect(foo_bar_.set({ foo: { bar: 42 } }, 23)).toEqual({
+      foo: { bar: 23 }
+    });
+  });
+  it(".set does not mutate any objects", () => {
+    const x = { foo: { bar: 42 } };
+    foo_bar_.set(x, 23);
+    expect(x).toEqual({ foo: { bar: 42 } });
+  });
+  it("allows to modify nested values", () => {
+    expect(foo_bar_.modify({ foo: { bar: 42 } }, n => n + 1)).toEqual({
+      foo: { bar: 43 }
+    });
+  });
+  it(".modify does not mutate any objects", () => {
+    const x = { foo: { bar: 42 } };
+    foo_bar_.modify(x, n => n + 1);
+    expect(x).toEqual({ foo: { bar: 42 } });
+  });
 });
 
 describe("mkLens", () => {
+  it("works without type annotations");
   it("is not verbose");
   it("works for exact object types");
   it("works for classes");
