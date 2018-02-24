@@ -24,6 +24,9 @@ export function compose<A, B, C>(x_: Lens<A, B>, y_: Lens<B, C>): Lens<A, C> {
 
 class ShortCut {}
 
+const invalidErrorMessage =
+  "invalid lens: use the passed in function on the inner type!";
+
 export function lens<O, A>(modify: (O, (A) => A) => O): Lens<O, A> {
   return mkLens(
     obj => {
@@ -42,10 +45,18 @@ export function lens<O, A>(modify: (O, (A) => A) => O): Lens<O, A> {
       if (result) {
         return result;
       }
-      throw "lens: unreachable";
+      throw new Error(invalidErrorMessage);
     },
     (obj, value) => {
-      return modify(obj, _ => value);
+      let ran = false;
+      const result = modify(obj, _ => {
+        ran = true;
+        return value;
+      });
+      if (!ran) {
+        throw new Error(invalidErrorMessage);
+      }
+      return result;
     }
   );
 }

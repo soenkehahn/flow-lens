@@ -177,7 +177,24 @@ describe("lens", () => {
     const bar_ = lens((obj, f) => ({ ...obj, bar: f(obj.bar) }));
     expect(bar_.modify({ bar: 42 }, n => n + 1)).toEqual({ bar: 43 });
   });
-  it("gives a nice error message when passed in 'modify' isn't used");
+  it("gives a nice error message when passed in function isn't used (get)", () => {
+    const bar_ = lens((obj, f) => obj);
+    expect(() => bar_.get({ bar: 42 })).toThrow(
+      "invalid lens: use the passed in function on the inner type!"
+    );
+  });
+  it("gives a nice error message when passed in function isn't used (set)", () => {
+    const bar_ = lens((obj, f) => obj);
+    expect(() => bar_.set({ bar: 42 }, 23)).toThrow(
+      "invalid lens: use the passed in function on the inner type!"
+    );
+  });
+  it("gives a nice error message when passed in function isn't used (modify)", () => {
+    const bar_ = lens((obj, f) => obj);
+    expect(() => bar_.modify({ bar: 42 }, n => n + 1)).toThrow(
+      "invalid lens: use the passed in function on the inner type!"
+    );
+  });
   it("works for exact object types");
   it("works for classes");
   it("allows to make a polymorphic lens");
