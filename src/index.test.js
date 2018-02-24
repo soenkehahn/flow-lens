@@ -1,6 +1,6 @@
 // @flow
 
-import { type Lens, mkLens, lens, compose } from "./lens";
+import { type Lens, mkLens, lens, compose } from "./.";
 
 const foo_: Lens<{ foo: number }, number> = mkLens(
   o => o.foo,

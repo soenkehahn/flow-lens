@@ -1,8 +1,27 @@
 {
+  "name": "flow-lens",
+  "version": "1.0.0-alpha",
+  "description": "type-safe simple lenses",
+  "main": "index.js",
+  "repository": "git@github.com:soenkehahn/flow-lens",
+  "author": "Sönke Hahn <soenkehahn@gmail.com>",
+  "license": "MIT",
+  "private": false,
+  "engines": { "node": ">=9.0.0" },
+  "files": ["dist/**/*", "src/**/*"],
+  "scripts": {
+    "prepare": "yarn test && yarn build",
+    "test": "yarn flow && yarn jest",
+    "build": "yarn build-babel && yarn build-flow",
+    "build-babel": "babel src --out-dir dist --ignore '**/*.test.js'",
+    "build-flow": "flow-copy-source --ignore '**/*.test.js' src dist"
+  },
   "devDependencies": {
+    "babel-cli": "^6.26.0",
     "babel-plugin-transform-flow-strip-types": "^6.22.0",
     "babel-preset-env": "^1.6.1",
     "flow-bin": "^0.66.0",
+    "flow-copy-source": "^1.3.0",
     "flow-typed": "^2.3.0",
     "jest": "^22.4.0"
   }
