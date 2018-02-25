@@ -1,6 +1,6 @@
 {
   "name": "flow-lens",
-  "version": "1.0.0-alpha",
+  "version": "1.0.0-alpha2",
   "description": "type-safe simple lenses",
   "main": "dist",
   "repository": "git@github.com:soenkehahn/flow-lens",
