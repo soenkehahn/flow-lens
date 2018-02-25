@@ -8,7 +8,7 @@
   "license": "MIT",
   "private": false,
   "engines": { "node": ">=9.0.0" },
-  "files": ["dist/**/*", "src/**/*"],
+  "files": ["dist/**/*"],
   "scripts": {
     "prepare": "yarn test && yarn build",
     "test": "yarn flow && yarn jest",
